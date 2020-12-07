@@ -241,12 +241,7 @@ function App() {
   )
 
   const [data, setData] = React.useState(() => {
-    firstName: "michel";
-    lastName: "namor.generate({ words: 1, numbers: 0 })";
-    age: "Math.floor(Math.random() * 30)";
-    visits: "Math.floor(Math.random() * 100)";
-    progress: "Math.floor(Math.random() * 100)";
-    status: 'single'
+    makeData(20)
   } )
   const [originalData] = React.useState(data)
   const [skipPageReset, setSkipPageReset] = React.useState(false)
