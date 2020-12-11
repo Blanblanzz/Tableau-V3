@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { useTable, usePagination, useBlockLayout, useResizeColumns  } from 'react-table'
 import logo1 from './logo1.png'
 
-import makeData from './makeData'
+
 
 const Styles = styled.div`
   padding: 1rem;
@@ -372,7 +372,7 @@ function App() {
           {
             Header: 'niveau',
             accessor: '_locNiveau',
-            width : 75
+            width : 130
           },
           {
             Header: 'materiau support',
@@ -410,11 +410,41 @@ function App() {
     []
   )
 
-  let donnees = [
-    {"_numeroLigne":0,"_nomImage":"0","_idRLI":"-1","_idPorte":"564943d6-544d-4571-816f-4c543e9588ed-0010b5c4","_locNiveau":"RDC","_materiauSupport":"A-Beton","_epSupport":"18","_largeurPorte":"1000","_hauteurPorte":"2160","_epaisseurPorte":"0","_poussant":"DP"}
-    ,{"_numeroLigne":1,"_nomImage":"0","_idRLI":"-1","_idPorte":"564943d6-544d-4571-816f-4c543e9588ed-0010b5c4","_locNiveau":"RDC","_materiauSupport":"A-Beton","_epSupport":"18","_largeurPorte":"1000","_hauteurPorte":"2160","_epaisseurPorte":"0","_poussant":"DP"}
-    ,{"_numeroLigne":2,"_nomImage":"0","_idRLI":"-1","_idPorte":"564943d6-544d-4571-816f-4c543e9588ed-0010b5c4","_locNiveau":"RDC","_materiauSupport":"A-Beton","_epSupport":"18","_largeurPorte":"1000","_hauteurPorte":"2160","_epaisseurPorte":"0","_poussant":"DP"}
-  ]
+  let donnees = 
+[
+  {"_numeroLigne":0,"_nomImage":"0","_idRLI":"-1","_idPorte":"564943d6-544d-4571-816f-4c543e9588ed-0010b5c4","_locNiveau":"RDC","_materiauSupport":"A-Beton","_epSupport":"18","_largeurPorte":"1000","_hauteurPorte":"2160","_epaisseurPorte":"0","_poussant":"DP"}
+  ,{"_numeroLigne":1,"_nomImage":"0","_idRLI":"-1","_idPorte":"564943d6-544d-4571-816f-4c543e9588ed-0010b5c4","_locNiveau":"RDC","_materiauSupport":"A-Beton","_epSupport":"18","_largeurPorte":"1000","_hauteurPorte":"2160","_epaisseurPorte":"0","_poussant":"DP"}
+  ,{"_numeroLigne":2,"_nomImage":"0","_idRLI":"-1","_idPorte":"564943d6-544d-4571-816f-4c543e9588ed-0010b5c4","_locNiveau":"RDC","_materiauSupport":"A-Beton","_epSupport":"18","_largeurPorte":"1000","_hauteurPorte":"2160","_epaisseurPorte":"0","_poussant":"DP"}
+]
+let compteur =-1;
+
+const newRow = () => {
+  compteur++
+  return (donnees[compteur]);
+  
+}
+
+const range = len => {
+  const arr = []
+  for (let i = 0; i < len; i++) {
+    arr.push(i)
+  }
+  return arr
+}
+
+    const makeData = (...lens) =>{
+      const makeDataLevel = (depth = 0) => {
+        const len = lens[depth]
+        return range(len).map(d => {
+          return {
+            ...newRow(),
+            subRows: lens[depth + 1] ? makeDataLevel(depth + 1) : undefined,
+          }
+        })
+      }
+    
+      return makeDataLevel()
+    }
 
   const [data, setData] = React.useState(() => makeData(donnees.length)
    )
@@ -454,9 +484,41 @@ function App() {
   // illustrate that flow...
   const resetData = () => setData(originalData)
 
+  let newColonneInput ="oui";
+  
+  const handleSubmit = (event)=>{
+    event.preventDefault();
+  }
+
+  const handleChange = (event)=>{
+    const value= event.currentTarget.value;
+    newColonneInput=value
+    console.log(event.currentTarget.value)
+  }
+
+  const createColonne = (arg) =>{
+    return {
+      Header: arg,
+      accessor: arg,
+      width : 150}
+  }
+
+  
+  const addColonne= () => {
+//console.log(donnees[1])
+//console.log(donnees[2])
+columns[1].columns.push(createColonne())
+data[1].test= "0"
+console.log(columns[1].columns)
+
+}
+
   return (
     <Styles>
-      <button onClick={resetData}>Reset Data</button>
+      <form onSubmit={handleSubmit}>
+        <input value ={newColonneInput} onChange={handleChange} type="text" placeholder="ajouter une colonne"></input>
+        <button onClick={addColonne}>Confirmer</button>
+      </form>
       <Table
         columns={columns}
         data={data}
