@@ -8,21 +8,22 @@ const range = len => {
   return arr
 }
 
+let donnees = [
+  {"_numeroLigne":0,"_nomImage":"0","_idRLI":"-1","_idPorte":"564943d6-544d-4571-816f-4c543e9588ed-0010b5c4","_locNiveau":"RDC","_materiauSupport":"A-Beton","_epSupport":"18","_largeurPorte":"1000","_hauteurPorte":"2160","_epaisseurPorte":"0","_poussant":"DP"}
+  ,{"_numeroLigne":1,"_nomImage":"0","_idRLI":"-1","_idPorte":"564943d6-544d-4571-816f-4c543e9588ed-0010b5c4","_locNiveau":"RDC","_materiauSupport":"A-Beton","_epSupport":"18","_largeurPorte":"1000","_hauteurPorte":"2160","_epaisseurPorte":"0","_poussant":"DP"}
+  ,{"_numeroLigne":2,"_nomImage":"0","_idRLI":"-1","_idPorte":"564943d6-544d-4571-816f-4c543e9588ed-0010b5c4","_locNiveau":"RDC","_materiauSupport":"A-Beton","_epSupport":"18","_largeurPorte":"1000","_hauteurPorte":"2160","_epaisseurPorte":"0","_poussant":"DP"}
+]
+
+let compteur =-1;
+
 const newPerson = () => {
+  
+  compteur++
   const statusChance = Math.random()
-  return {
-    firstName: "michel",
-    lastName: namor.generate({ words: 1, numbers: 0 }),
-    age: Math.floor(Math.random() * 30),
-    visits: Math.floor(Math.random() * 100),
-    progress: Math.floor(Math.random() * 100),
-    status:
-      statusChance > 0.66
-        ? 'relationship'
-        : statusChance > 0.33
-        ? 'complicated'
-        : 'single',
-  }
+  let cles = Object.keys(donnees[compteur])
+  return (donnees[compteur])
+  
+  
 }
 
 export default function makeData(...lens) {
