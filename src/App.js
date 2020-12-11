@@ -2,7 +2,8 @@ import React from 'react'
 import styled from 'styled-components'
 import { useTable, usePagination, useBlockLayout, useResizeColumns  } from 'react-table'
 import logo1 from './logo1.png'
-
+import logo2 from './logo2.png'
+import logo3 from './logo3.png'
 
 
 const Styles = styled.div`
@@ -112,7 +113,8 @@ const Styles = styled.div`
 `
 
 
-
+let passage = 0;
+let compteur=0;
 
 // Create an editable cell renderer
 const EditableCell = ({
@@ -128,20 +130,30 @@ const EditableCell = ({
     setValue(e.target.value)
   }
 
+  if (passage ==1) {
+    compteur = 0
+    passage = 0
+  }
+
   // We'll only update the external data when the input is blurred
   const onBlur = () => {
     updateMyData(index, id, value)
   }
-
+  
   // If the initialValue is changed external, sync it up with our state
   React.useEffect(() => {
     setValue(initialValue)
   }, [initialValue])
+  let nomImg= [logo1,logo2,logo3];
+  
+  
   return (
     <>
     
-    {id==='_poussant' && <input className='img' type="image" src={logo1}   />}
-    {id!=='_poussant' && <input value={value} onChange={onChange} onBlur={onBlur}  />} 
+    {id ==='_poussant' && <><input className='img' type="image" src={nomImg[compteur] }    /> <code {...passage===0 && compteur++  }{...compteur===nomImg.length && passage++}/> </> }
+     
+    {id !=='_poussant' && <input value={value} onChange={onChange} onBlur={onBlur}  />} 
+     
   
   {/*  <input value={value} onChange={onChange} onBlur={onBlur}  /> */}
   </>
@@ -226,7 +238,7 @@ function Table({ columns, data, updateMyData, skipPageReset }) {
   // Render the UI for your table
   return (
     <>
-    <img src={logo1} alt="marche pas"/> 
+  
       <button onClick={click}>Afficher les checkboxes</button>
       <div id="mask">
         
