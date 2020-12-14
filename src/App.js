@@ -234,6 +234,7 @@ function Table({ columns, data, updateMyData, skipPageReset }) {
   }
 
   
+
  
   // Render the UI for your table
   return (
@@ -264,7 +265,7 @@ function Table({ columns, data, updateMyData, skipPageReset }) {
                   <div {...column.getHeaderProps()} className="th">
                     {column.render('Header')}   
                     
-            
+                    {/*console.log(allColumns)*/}
                  {/*      <input type="checkbox" {...column.getToggleHiddenProps()} />{' '} */}
               
                      {column.render('Header')==='Id RLI' && column.toggleHidden(true)}
@@ -496,41 +497,48 @@ const range = len => {
   // illustrate that flow...
   const resetData = () => setData(originalData)
 
-  let newColonneInput ="oui";
-  
   const handleSubmit = (event)=>{
     event.preventDefault();
-  }
+    //React.useMemo()
+    if (newColonneInput!==""){
+    columns[1].columns.push(createColonne(newColonneInput))
+
+    
+    console.log(columns[1].columns)
+    data[1].[newColonneInput]="test"
+    console.log(data)
+    updateMyData()
+
+
+    setColonneInput("")
+  }}
+
+
+    
+  const [newColonneInput,setColonneInput] = React.useState("")
+
 
   const handleChange = (event)=>{
-    const value= event.currentTarget.value;
-    newColonneInput=value
-    console.log(event.currentTarget.value)
+    setColonneInput(event.currentTarget.value)
   }
 
   const createColonne = (arg) =>{
+    //console.log(arg)
     return {
       Header: arg,
       accessor: arg,
       width : 150}
   }
-
   
-  const addColonne= () => {
-//console.log(donnees[1])
-//console.log(donnees[2])
-columns[1].columns.push(createColonne())
-data[1].test= "0"
-console.log(columns[1].columns)
-
-}
+  
+  
 
   return (
     <Styles>
       <form onSubmit={handleSubmit}>
-        <input value ={newColonneInput} onChange={handleChange} type="text" placeholder="ajouter une colonne"></input>
-        <button onClick={addColonne}>Confirmer</button>
-      </form>
+    <input value ={newColonneInput} onChange={handleChange} type="text" placeholder="ajouter une colonne"></input>
+    <button >Confirmer</button>
+  </form>
       <Table
         columns={columns}
         data={data}
