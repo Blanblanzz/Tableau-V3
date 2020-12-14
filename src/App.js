@@ -201,7 +201,7 @@ function Table({ columns, data, updateMyData, skipPageReset }) {
     previousPage,
     setPageSize,
     allColumns,
-    getToggleHideAllColumnsProps,
+    
     
     
 
@@ -361,8 +361,8 @@ function Table({ columns, data, updateMyData, skipPageReset }) {
 
 
 function App() {
-  const columns = React.useMemo(
-    () => [
+  const [columns,setColums] = React.useState(
+     [
       {
         Header: 'Name',
         columns: [
@@ -501,16 +501,16 @@ const range = len => {
     event.preventDefault();
     //React.useMemo()
     if (newColonneInput!==""){
-    columns[1].columns.push(createColonne(newColonneInput))
+       const newColumns=columns
+    newColumns[1].columns.push(createColonne(newColonneInput))
 
     
-    console.log(columns[1].columns)
-    data[1].[newColonneInput]="test"
     console.log(data)
-    updateMyData()
-
-
+    
+    setColums(newColumns.slice())
     setColonneInput("")
+    
+  
   }}
 
 
