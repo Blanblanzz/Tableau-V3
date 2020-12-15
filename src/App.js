@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { useTable, usePagination, useBlockLayout, useResizeColumns  } from 'react-table'
 import logo1 from './logo1.png'
@@ -150,9 +150,9 @@ const EditableCell = ({
   return (
     <>
     
-    {id ==='_poussant' && <><input className='img' type="image" src={nomImg[compteur] }    /> <code {...passage===0 && compteur++  }{...compteur===nomImg.length && passage++}/> </> }
+  {/*   {id ==='_nomImage' && <><input className='img' type="image" src={nomImg[compteur] }    /> <code {...passage===0 && compteur++  }{...compteur===nomImg.length && passage++}/> </> } */}
      
-    {id !=='_poussant' && <input value={value} onChange={onChange} onBlur={onBlur}  />} 
+    {id !=='_nomImage' && <input value={value} onChange={onChange} onBlur={onBlur}  />} 
      
   
   {/*  <input value={value} onChange={onChange} onBlur={onBlur}  /> */}
@@ -225,7 +225,7 @@ function Table({ columns, data, updateMyData, skipPageReset }) {
     useBlockLayout,
     useResizeColumns
   )
- 
+  console.log(data);
   const click = () =>{
     if (document.getElementById("mask").style.display === "block")
         document.getElementById("mask").style = "display : none"
@@ -361,11 +361,44 @@ function Table({ columns, data, updateMyData, skipPageReset }) {
 
 
 function App() {
+    const [error, setError] = useState(null);
+    const [isLoaded, setIsLoaded] = useState(false);
+    const [items, setItems] = useState([]);
+  
+    // Remarque : le tableau vide de dépendances [] indique
+    // que useEffect ne s’exécutera qu’une fois, un peu comme
+    // componentDidMount()
+    useEffect(() => {
+      fetch("http://localhost/ping-pong.php")
+        .then(res => res.json())
+        .then(
+          (result) => {
+            setIsLoaded(true);
+            setItems(result);
+
+           
+          },
+          // Remarque : il faut gérer les erreurs ici plutôt que dans
+          // un bloc catch() afin que nous n’avalions pas les exceptions
+          // dues à de véritables bugs dans les composants.
+          (error) => {
+            setIsLoaded(true);
+            setError(error);
+          }
+        )
+    }, [])
+   
+
   const [columns,setColums] = React.useState(
      [
       {
         Header: 'Name',
         columns: [
+            {
+                Header: 'IDchantier',
+                accessor: '_idChantier',
+                width : 118
+              },
           {
             Header: 'numero ligne',
             accessor: '_numeroLigne',
@@ -415,24 +448,22 @@ function App() {
           {
             Header: 'Poussant',
             accessor: '_poussant',
-            width : 81
+            width : 118
           },
+          
         ],
       },
     ],
     []
   )
-
-  let donnees = 
-[
-  {"_numeroLigne":0,"_nomImage":"0","_idRLI":"-1","_idPorte":"564943d6-544d-4571-816f-4c543e9588ed-0010b5c4","_locNiveau":"RDC","_materiauSupport":"A-Beton","_epSupport":"18","_largeurPorte":"1000","_hauteurPorte":"2160","_epaisseurPorte":"0","_poussant":"DP"}
-  ,{"_numeroLigne":1,"_nomImage":"0","_idRLI":"-1","_idPorte":"564943d6-544d-4571-816f-4c543e9588ed-0010b5c4","_locNiveau":"RDC","_materiauSupport":"A-Beton","_epSupport":"18","_largeurPorte":"1000","_hauteurPorte":"2160","_epaisseurPorte":"0","_poussant":"DP"}
-  ,{"_numeroLigne":2,"_nomImage":"0","_idRLI":"-1","_idPorte":"564943d6-544d-4571-816f-4c543e9588ed-0010b5c4","_locNiveau":"RDC","_materiauSupport":"A-Beton","_epSupport":"18","_largeurPorte":"1000","_hauteurPorte":"2160","_epaisseurPorte":"0","_poussant":"DP"}
-]
-let compteur =-1;
+ 
+    let donnees = items;
+   
+    let compteur =-1;
 
 const newRow = () => {
   compteur++
+  
   return (donnees[compteur]);
   
 }
@@ -446,6 +477,7 @@ const range = len => {
 }
 
     const makeData = (...lens) =>{
+        
       const makeDataLevel = (depth = 0) => {
         const len = lens[depth]
         return range(len).map(d => {
@@ -459,11 +491,14 @@ const range = len => {
       return makeDataLevel()
     }
 
+    
   const [data, setData] = React.useState(() => makeData(donnees.length)
    )
+   
+   
   const [originalData] = React.useState(data)
   const [skipPageReset, setSkipPageReset] = React.useState(false)
-
+ 
   // We need to keep the table from resetting the pageIndex when we
   // Update data. So we can keep track of that flag with a ref.
 
@@ -505,14 +540,16 @@ const range = len => {
     newColumns[1].columns.push(createColonne(newColonneInput))
 
     
-    console.log(data)
+    
     
     setColums(newColumns.slice())
     setColonneInput("")
     
   
   }}
-
+  const chargerDonnee = () => {
+    setData(makeData(donnees.length))
+  }
 
     
   const [newColonneInput,setColonneInput] = React.useState("")
@@ -539,6 +576,7 @@ const range = len => {
     <input value ={newColonneInput} onChange={handleChange} type="text" placeholder="ajouter une colonne"></input>
     <button >Confirmer</button>
   </form>
+  <button onClick ={chargerDonnee}>Charger</button>
       <Table
         columns={columns}
         data={data}
@@ -550,3 +588,55 @@ const range = len => {
 }
 
 export default App
+
+{/*
+class AppPHP extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+          error: null,
+          isLoaded: false,
+          items: []
+        };
+      }
+
+    onClick() { 
+        fetch("http://localhost/ping-pong.php")
+        
+      .then(res => res.json())
+      .then(
+        (result) => {
+          this.setState({
+            isLoaded: true,
+            items: result.items
+          });
+        },
+        // Remarque : il est important de traiter les erreurs ici
+        // au lieu d'utiliser un bloc catch(), pour ne pas passer à la trappe
+        // des exceptions provenant de réels bugs du composant.
+        (error) => {
+          this.setState({
+            isLoaded: true,
+            error
+          });
+        }
+      )
+  }
+
+
+
+    render() { 
+        const { error, isLoaded, items } = this.state;
+        return ( 
+            <>
+            <button onClick={this.onClick} >Test</button> 
+            <code {...console.log(items)}/>
+            </>
+        ); 
+    } 
+} */}
+
+    
+ 
+
+
