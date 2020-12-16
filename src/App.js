@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import styled from 'styled-components'
-import { useTable, usePagination, useBlockLayout, useResizeColumns  } from 'react-table'
+import { useTable, usePagination, useBlockLayout, useResizeColumns, useSortBy }from 'react-table'
 import logo1 from './logo1.png'
 import logo2 from './logo2.png'
 import logo3 from './logo3.png'
@@ -62,6 +62,7 @@ const Styles = styled.div`
         border-right: 0;
       }
       input {
+        display: table-cell;
         font-size: 1rem;
         padding: 0 ;
         margin: 0;
@@ -70,7 +71,7 @@ const Styles = styled.div`
         ${'' /* In this example we use an absolutely position resizer,
        so this is required. */}
        position: relative;
-       width : 100px;
+       width : 100%;
        
        
       
@@ -114,7 +115,7 @@ const Styles = styled.div`
 
 
 let passage = 0;
-let compteur=0;
+let compteur1=0;
 
 // Create an editable cell renderer
 const EditableCell = ({
@@ -131,7 +132,7 @@ const EditableCell = ({
   }
 
   if (passage ==1) {
-    compteur = 0
+    compteur1 = 0
     passage = 0
   }
 
@@ -150,7 +151,7 @@ const EditableCell = ({
   return (
     <>
     
-  {/*   {id ==='_nomImage' && <><input className='img' type="image" src={nomImg[compteur] }    /> <code {...passage===0 && compteur++  }{...compteur===nomImg.length && passage++}/> </> } */}
+  {/*   {id ==='_nomImage' && <><input className='img' type="image" src={nomImg[compteur1] }    /> <code {...passage===0 && compteur1++  }{...compteur1===nomImg.length && passage++}/> </> } */}
      
     {id !=='_nomImage' && <input value={value} onChange={onChange} onBlur={onBlur}  />} 
      
@@ -221,11 +222,13 @@ function Table({ columns, data, updateMyData, skipPageReset }) {
       // cell renderer!
       updateMyData,
     },
+    useSortBy,
     usePagination,
     useBlockLayout,
-    useResizeColumns
+    useResizeColumns,
+    
   )
-  console.log(data);
+  
   const click = () =>{
     if (document.getElementById("mask").style.display === "block")
         document.getElementById("mask").style = "display : none"
@@ -262,14 +265,21 @@ function Table({ columns, data, updateMyData, skipPageReset }) {
             {headerGroups.map(headerGroup => (
               <div {...headerGroup.getHeaderGroupProps()} className="tr">
                 {headerGroup.headers.map(column => (
-                  <div {...column.getHeaderProps()} className="th">
+                  <div {...column.getHeaderProps(column.getSortByToggleProps())} className="th">
                     {column.render('Header')}   
-                    
+                    <span>
+                    {column.isSorted
+                      ? column.isSortedDesc
+                        ? ' 🔽'
+                        : ' 🔼'
+                      : ''}
+                  </span>
                     {/*console.log(allColumns)*/}
                  {/*      <input type="checkbox" {...column.getToggleHiddenProps()} />{' '} */}
               
                      {column.render('Header')==='Id RLI' && column.toggleHidden(true)}
-          
+                     {column.render('Header')==='IDchantier' && column.toggleHidden(true)}
+
                       {/* Use column.getResizerProps to hook up the events correctly */}
                       <div
                         {...column.getResizerProps()}
@@ -361,32 +371,73 @@ function Table({ columns, data, updateMyData, skipPageReset }) {
 
 
 function App() {
-    const [error, setError] = useState(null);
-    const [isLoaded, setIsLoaded] = useState(false);
-    const [items, setItems] = useState([]);
+  const [error, setError] = useState(null);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const [items, setItems] = useState([]);
+
+  useEffect(() => {
+    fetch("http://localhost/ping-pong.php")
+      .then(res => res.json())
+      .then(
+        (result) => {
+          setIsLoaded(true);
+          setItems(result);
+
+         
+        },
+        // Remarque : il faut gérer les erreurs ici plutôt que dans
+        // un bloc catch() afin que nous n’avalions pas les exceptions
+        // dues à de véritables bugs dans les composants.
+        (error) => {
+          setIsLoaded(true);
+          setError(error);
+        }
+      )
+  }, [])
+  let donnees = items;
+  let compteur =-1;
+
+const newRow = () => {
+compteur++
+
+return (donnees[compteur]);
+
+}
+
+const range = len => {
+const arr = []
+for (let i = 0; i < len; i++) {
+  arr.push(i)
+}
+return arr
+}
+
+  const makeData = (...lens) =>{
+      
+    const makeDataLevel = (depth = 0) => {
+      const len = lens[depth]
+      return range(len).map(d => {
+        return {
+          ...newRow(),
+          subRows: lens[depth + 1] ? makeDataLevel(depth + 1) : undefined,
+        }
+      })
+    }
   
+    return makeDataLevel()
+  }
+
+
+
+    const [data, setData] = React.useState(() => makeData(donnees.length));
+
+   
     // Remarque : le tableau vide de dépendances [] indique
     // que useEffect ne s’exécutera qu’une fois, un peu comme
     // componentDidMount()
-    useEffect(() => {
-      fetch("http://localhost/ping-pong.php")
-        .then(res => res.json())
-        .then(
-          (result) => {
-            setIsLoaded(true);
-            setItems(result);
+   
 
-           
-          },
-          // Remarque : il faut gérer les erreurs ici plutôt que dans
-          // un bloc catch() afin que nous n’avalions pas les exceptions
-          // dues à de véritables bugs dans les composants.
-          (error) => {
-            setIsLoaded(true);
-            setError(error);
-          }
-        )
-    }, [])
+    
    
 
   const [columns,setColums] = React.useState(
@@ -457,44 +508,9 @@ function App() {
     []
   )
  
-    let donnees = items;
-   
-    let compteur =-1;
-
-const newRow = () => {
-  compteur++
-  
-  return (donnees[compteur]);
-  
-}
-
-const range = len => {
-  const arr = []
-  for (let i = 0; i < len; i++) {
-    arr.push(i)
-  }
-  return arr
-}
-
-    const makeData = (...lens) =>{
-        
-      const makeDataLevel = (depth = 0) => {
-        const len = lens[depth]
-        return range(len).map(d => {
-          return {
-            ...newRow(),
-            subRows: lens[depth + 1] ? makeDataLevel(depth + 1) : undefined,
-          }
-        })
-      }
-    
-      return makeDataLevel()
-    }
 
     
-  const [data, setData] = React.useState(() => makeData(donnees.length)
-   )
-   
+  
    
   const [originalData] = React.useState(data)
   const [skipPageReset, setSkipPageReset] = React.useState(false)
@@ -576,6 +592,7 @@ const range = len => {
     <input value ={newColonneInput} onChange={handleChange} type="text" placeholder="ajouter une colonne"></input>
     <button >Confirmer</button>
   </form>
+
   <button onClick ={chargerDonnee}>Charger</button>
       <Table
         columns={columns}
@@ -589,54 +606,5 @@ const range = len => {
 
 export default App
 
-{/*
-class AppPHP extends React.Component {
-    constructor(props) {
-        super(props);
-        this.state = {
-          error: null,
-          isLoaded: false,
-          items: []
-        };
-      }
-
-    onClick() { 
-        fetch("http://localhost/ping-pong.php")
-        
-      .then(res => res.json())
-      .then(
-        (result) => {
-          this.setState({
-            isLoaded: true,
-            items: result.items
-          });
-        },
-        // Remarque : il est important de traiter les erreurs ici
-        // au lieu d'utiliser un bloc catch(), pour ne pas passer à la trappe
-        // des exceptions provenant de réels bugs du composant.
-        (error) => {
-          this.setState({
-            isLoaded: true,
-            error
-          });
-        }
-      )
-  }
-
-
-
-    render() { 
-        const { error, isLoaded, items } = this.state;
-        return ( 
-            <>
-            <button onClick={this.onClick} >Test</button> 
-            <code {...console.log(items)}/>
-            </>
-        ); 
-    } 
-} */}
-
-    
- 
 
 
