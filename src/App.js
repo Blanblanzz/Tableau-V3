@@ -115,7 +115,7 @@ const Styles = styled.div`
 
 
 let passage = 0;
-let compteur1=0;
+let compteur=0;
 
 // Create an editable cell renderer
 const EditableCell = ({
@@ -131,8 +131,8 @@ const EditableCell = ({
     setValue(e.target.value)
   }
 
-  if (passage ==1) {
-    compteur1 = 0
+  if (passage ===1) {
+    compteur = 0
     passage = 0
   }
 
@@ -548,13 +548,24 @@ return arr
   // illustrate that flow...
   const resetData = () => setData(originalData)
 
+  const[confirmer,setConfirmer]=useState("Ajouter une colonne")
+  
+  const tabNomColonne=[]
+
+  columns[1].columns.forEach(function(element,index){
+    tabNomColonne.push(element.Header);
+  })    
+    
+  
+
   const handleSubmit = (event)=>{
     event.preventDefault();
     //React.useMemo()
-    if (newColonneInput!==""){
+    
+    if (newColonneInput!==""  && tabNomColonne.includes(newColonneInput)===false){
        const newColumns=columns
     newColumns[1].columns.push(createColonne(newColonneInput))
-
+    tabNomColonne.push(newColonneInput);
     
     
     
@@ -562,12 +573,18 @@ return arr
     setColonneInput("")
     
   
-  }}
+  }
+  
+  
+else{setColonneInput("")
+setConfirmer("la colonne existe deja")
+}
+
+  }
+    
   const chargerDonnee = () => {
     setData(makeData(donnees.length))
   }
-
-    
   const [newColonneInput,setColonneInput] = React.useState("")
 
 
@@ -589,8 +606,8 @@ return arr
   return (
     <Styles>
       <form onSubmit={handleSubmit}>
-    <input value ={newColonneInput} onChange={handleChange} type="text" placeholder="ajouter une colonne"></input>
-    <button >Confirmer</button>
+    <input value ={newColonneInput} onChange={handleChange} type="text" placeholder={confirmer}></input>
+    <button >Ajouter</button>
   </form>
 
   <button onClick ={chargerDonnee}>Charger</button>
